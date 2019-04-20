@@ -9,10 +9,20 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import axios from 'axios';
+import ElectronStore from 'electron-store';
+
+const store = new ElectronStore();
 
 @Component
 export default class Login extends Vue {
-  token: string = '';
+  token: any = store.get('TOGGL_APITOKEN') || '';
+
+  created(){
+    if(store.get('TOGGL_APITOKEN')) {
+      this.token = store.get('TOGGL_APITOKEN');
+      this.login();
+    }
+  }
 
   login(){
     axios.get('https://www.toggl.com/api/v8/me', {
@@ -20,9 +30,13 @@ export default class Login extends Vue {
         username: this.token,
         password: 'api_token'
       }
-    }).then((response)=>{
-      //TODO: Navigate to dashboard
-      console.log(response);
+    }).then((res)=>{
+      axios.defaults.auth = {
+        username: this.token,
+        password: 'api_token'
+      }
+      this.$router.push('dashboard');
+      store.set('TOGGL_APITOKEN', this.token);
     }).catch((err)=>{
       //TODO: Show error to the user
     })
