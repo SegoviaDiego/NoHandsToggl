@@ -41,7 +41,7 @@
       <md-checkbox v-model="userSelection.billable">Billable entry #{{userSelection.billable}}</md-checkbox>
     </div>
     <div class="button" v-if="userSelection.wid">
-      <button v-on:click="startTimeEntry">Start time entry</button>
+      <button v-on:click="saveTimeEntry">Save defaulult time entry</button>
     </div>
   </div>
 </template>
@@ -86,16 +86,13 @@ export default class TimeEntrySetup extends Vue {
     return axios.get('https://www.toggl.com/api/v8/workspaces');
   }
 
-  startTimeEntry(){
-    axios.post('https://www.toggl.com/api/v8/time_entries/start', {
-      time_entry: {
-          ...this.userSelection,
-          created_with: 'TOGGL_NO_HANDS'
-      }
-    }).then((res)=>{
-      store.set('DEFAULT_TIME_ENTRY_SETUP', res.data);
-      this.$emit('newTimeEntry', res.data);
-    })
+  saveTimeEntry(){
+    const defaultTimeEntry = {
+      ...this.userSelection,
+      created_with: 'TOGGL_NO_HANDS'
+    };
+    store.set('DEFAULT_TIME_ENTRY_SETUP', defaultTimeEntry);
+    this.$emit('newTimeEntry', defaultTimeEntry);
   }
 }
 </script>

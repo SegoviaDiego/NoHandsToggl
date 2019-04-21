@@ -30,7 +30,7 @@ export default class Login extends Vue {
         username: this.token,
         password: 'api_token'
       }
-    }).then((res)=>{
+    }).then(()=>{
       axios.defaults.auth = {
         username: this.token,
         password: 'api_token'
