@@ -1,5 +1,7 @@
 {
   "name": "nohandstoggl",
+  "author": "Diego Segovia <segoviadiegomatias@gmail.com>",
+  "description": "Track your time with toggl app the no hands way!",
   "version": "0.1.0",
   "private": true,
   "scripts": {
