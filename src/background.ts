@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import {
   createProtocol,
   installVueDevtools
@@ -62,6 +62,30 @@ app.on('ready', async () => {
     }
   }
   createWindow()
+
+  const electron = require('electron');
+  const powerMonitor: any = electron.powerMonitor;
+
+  ipcMain.on('get-idle-time', (event: any) => {
+    powerMonitor.querySystemIdleTime((idleTime: any)=>{
+      event.sender.send('get-idle-time', idleTime)
+    })
+  })
+
+  app.on('window-all-closed', (event: any) => {
+    event.preventDefault();
+    ipcMain.emit('app-shut-down');
+  })
+
+  powerMonitor.on('shutdown', (event: any) => {
+    event.preventDefault();
+    ipcMain.emit('app-shut-down');
+  })
+
+  powerMonitor.on('suspend', () => {
+    ipcMain.emit('app-close');
+  })
+
 })
 
 // Exit cleanly on request from parent process in development mode.
