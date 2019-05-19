@@ -1,7 +1,7 @@
 {
   "name": "nohandstoggl",
   "author": "Diego Segovia <segoviadiegomatias@gmail.com>",
-  "description": "Track your time with toggl app the no hands way!",
+  "description": "Track your time with toggl without using ur hands!",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,46 +15,35 @@
   },
   "main": "background.js",
   "dependencies": {
+    "auto-launch": "^5.0.5",
     "axios": "^0.18.0",
+    "chartist": "0.11.0",
     "core-js": "^2.6.5",
-    "electron-store": "^3.2.0",
+    "google-maps": "3.3.0",
+    "nedb": "^1.8.0",
+    "rxjs": "^6.5.2",
+    "sweetalert2": "^8.11.1",
     "vue": "^2.6.10",
     "vue-class-component": "^7.0.2",
+    "vue-clickaway": "2.2.2",
+    "vue-github-buttons": "3.1.0",
     "vue-material": "^1.0.0-beta-10.2",
     "vue-property-decorator": "^8.1.0",
-    "vue-router": "^3.0.3"
+    "vue-router": "^3.0.3",
+    "vue-social-sharing": "2.4.3"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.6.0",
-    "@vue/cli-plugin-eslint": "^3.6.0",
     "@vue/cli-plugin-typescript": "^3.6.0",
     "@vue/cli-service": "^3.6.0",
-    "@vue/eslint-config-airbnb": "^4.0.0",
-    "@vue/eslint-config-typescript": "^4.0.0",
-    "babel-eslint": "^10.0.1",
     "electron": "^4.1.4",
-    "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^5.0.0",
     "sass": "^1.18.0",
     "sass-loader": "^7.1.0",
     "typescript": "^3.4.3",
     "vue-cli-plugin-electron-builder": "^1.2.0",
-    "vue-template-compiler": "^2.5.21"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "@vue/airbnb",
-      "@vue/typescript"
-    ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "@typescript-eslint/parser"
-    }
+    "vue-template-compiler": "^2.5.21",
+    "es6-promise": "4.2.6",
+    "node-sass": "4.12.0"
   },
   "postcss": {
     "plugins": {
