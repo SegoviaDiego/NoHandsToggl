@@ -6,6 +6,7 @@ export default class Database {
     static timeEntry: any;
     private static defaultSettings = {
         token: '',
+        pingMode: false,
         maxIdleTime: 10,
         showHoursWorkedChart: true,
         showTagsChart: true,

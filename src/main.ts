@@ -15,8 +15,13 @@ import Notifications from './components/NotificationPlugin';
 // MaterialDashboard plugin
 import MaterialDashboard from './material-dashboard';
 
+import VueMaterial from 'vue-material'
+import 'vue-material/dist/vue-material.min.css'
+
+
 Vue.prototype.$Chartist = Chartist;
 
+Vue.use(VueMaterial)
 Vue.use(MaterialDashboard);
 Vue.use(GlobalComponents);
 Vue.use(GlobalDirectives);
