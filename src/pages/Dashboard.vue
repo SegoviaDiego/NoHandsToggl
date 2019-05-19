@@ -4,9 +4,9 @@
       <!-- Hours worked -->
       <div class="md-layout chart1">
         <chart-card
-            v-if="settings.showHoursWorkedChart"
-            :chart-data="dailySalesChart.data"
-            :chart-options="dailySalesChart.options"
+            v-if="settings.showHoursWorkedChart && hoursWorkedChart && hoursWorkedChart.data"
+            :chart-data="hoursWorkedChart.data"
+            :chart-options="hoursWorkedChart.options"
             :chart-type="'Line'"
             data-background-color="blue">
           <template slot="content">
@@ -22,20 +22,20 @@
           </template>
 
           <template slot="footer">
-            <div class="stats">
+            <!-- <div class="stats">
               <md-icon>access_time</md-icon>
-              updated 4 minutes ago
-            </div>
+              thi
+            </div> -->
           </template>
         </chart-card>
       </div>
       <!-- Second chart -->
       <div class="md-layout chart2">
         <chart-card
-            v-if="settings.showTagsChart"
-            :chart-data="emailsSubscriptionChart.data"
-            :chart-options="emailsSubscriptionChart.options"
-            :chart-responsive-options="emailsSubscriptionChart.responsiveOptions"
+            v-if="settings.showTagsChart && topUsedTagsChart && topUsedTagsChart.data"
+            :chart-data="topUsedTagsChart.data"
+            :chart-options="topUsedTagsChart.options"
+            :chart-responsive-options="topUsedTagsChart.responsiveOptions"
             :chart-type="'Bar'"
             data-background-color="red">
           <template slot="content">
@@ -48,19 +48,19 @@
           </template>
 
           <template slot="footer">
-            <div class="stats">
+            <!-- <div class="stats">
               <md-icon>access_time</md-icon>
               updated 10 days ago
-            </div>
+            </div> -->
           </template>
         </chart-card>
       </div>
       <!-- third chart -->
       <div class="md-layout chart3">
         <chart-card
-          v-if="settings.showProductivityChart"
-          :chart-data="dataCompletedTasksChart.data"
-          :chart-options="dataCompletedTasksChart.options"
+          v-if="settings.showProductivityChart && productivityChart && productivityChart.data"
+          :chart-data="productivityChart.data"
+          :chart-options="productivityChart.options"
           :chart-type="'Line'"
           data-background-color="green">
           <template slot="content">
@@ -73,10 +73,10 @@
           </template>
 
           <template slot="footer">
-            <div class="stats">
+            <!-- <div class="stats">
               <md-icon>access_time</md-icon>
               campaign sent 26 minutes ago
-            </div>
+            </div> -->
           </template>
         </chart-card>
       </div>
@@ -87,12 +87,12 @@
           v-if="settings.showHoursWorkedStat"
           data-background-color="green">
           <template slot="header">
-            <md-icon>store</md-icon>
+            <md-icon>work</md-icon>
           </template>
 
           <template slot="content">
             <p class="category">Hours worked</p>
-            <h3 class="title">6</h3>
+            <h3 class="title">{{hoursWorkedToday}}</h3>
           </template>
 
           <template slot="footer">
@@ -108,13 +108,13 @@
           v-if="settings.showHoursWorkedStat"
           data-background-color="orange">
           <template slot="header">
-            <md-icon>content_copy</md-icon>
+            <md-icon>work</md-icon>
           </template>
 
           <template slot="content">
             <p class="category">Hours worked</p>
             <h3 class="title">
-              72
+              {{hoursWorkedThisWeek}}
             </h3>
           </template>
 
@@ -154,7 +154,7 @@
           v-if="settings.showTagsStat"
           data-background-color="blue">
           <template slot="header">
-            <i class="fab fa-twitter"></i>
+            <md-icon>local_offer</md-icon>
           </template>
 
           <template slot="content">
@@ -181,6 +181,8 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import axios from 'axios';
 import dbService from '@/database/dbService';
 import { first } from 'rxjs/operators';
+import moment from 'moment';
+import _ from 'lodash';
 
 import {
   StatsCard,
@@ -201,27 +203,73 @@ import {
 })
 export default class Dashboard extends Vue {
   public settings: any = {};
-  dailySalesChart: any;
-  dataCompletedTasksChart: any;
-  emailsSubscriptionChart: any;
+  hoursWorkedChart: any = null;
+  topUsedTagsChart: any = null;
+  productivityChart: any = null;
+  hoursWorkedToday: any = 0;
+  hoursWorkedThisWeek: any = 0;
   $Chartist: any;
+
 
   async created() {
     dbService.getSettings().pipe( first() )
       .subscribe((settings: any = {}) => {
-          this.settings = settings;
+        this.settings = settings;
       });
-    this.dailySalesChart = {
+    this.loadHoursWorked();
+    this.loadStats();
+    this.loadTags();
+    this.loadProductivity();
+  }
+
+  loadStats(){
+    this.loadHoursWorkedToday();
+    this.loadHoursWorkedWeek();
+  }
+
+  async loadHoursWorkedToday(){
+    const start_date = moment().startOf('day').toISOString();
+    const end_date = moment().endOf('day').toISOString();
+    const timeEntries = await axios.get(`https://www.toggl.com/api/v8/time_entries?start_date=${start_date}&end_date=${end_date}`);
+    let hours = 0;
+    for(const timeEntry of timeEntries.data){
+      timeEntry.start = moment(timeEntry.start);
+      timeEntry.stop = moment(timeEntry.stop || new Date());
+
+      const duration = moment.duration(timeEntry.stop.diff(timeEntry.start));
+      hours += duration.asHours();
+    }
+    this.hoursWorkedToday = hours.toFixed(0);
+  }
+
+  async loadHoursWorkedWeek(){
+    const start_date = moment().startOf('week').toISOString();
+    const end_date = moment().endOf('week').toISOString();
+    const timeEntries = await axios.get(`https://www.toggl.com/api/v8/time_entries?start_date=${start_date}&end_date=${end_date}`);
+    let hours = 0;
+    for(const timeEntry of timeEntries.data){
+      timeEntry.start = moment(timeEntry.start);
+      timeEntry.stop = moment(timeEntry.stop || new Date());
+
+      const duration = moment.duration(timeEntry.stop.diff(timeEntry.start));
+      hours += duration.asHours();
+    }
+    this.hoursWorkedThisWeek = hours.toFixed(0);
+  }
+
+  async loadHoursWorked(){
+    const series = [ await this.getHoursWorked() ];
+    this.hoursWorkedChart = {
       data: {
         labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-        series: [[12, 17, 7, 17, 23, 18, 38]],
+        series,
       },
       options: {
         lineSmooth: this.$Chartist.Interpolation.cardinal({
           tension: 0,
         }),
         low: 0,
-        high: 50, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
+        high: _.max(series[0]) + 5,
         chartPadding: {
           top: 0,
           right: 0,
@@ -230,7 +278,32 @@ export default class Dashboard extends Vue {
         },
       },
     };
-    this.dataCompletedTasksChart = {
+  }
+
+  async getHoursWorked() {
+    const data = [];
+    for(let day = -7; day <= -1; day++){
+      const start_date = moment().weekday(day).startOf('day').toISOString();
+      const end_date = moment().weekday(day).endOf('day').toISOString();
+      const timeEntries = await axios.get(`https://www.toggl.com/api/v8/time_entries?start_date=${start_date}&end_date=${end_date}`);
+      let hours = 0;
+      for(const timeEntry of timeEntries.data){
+        if(timeEntry.start && timeEntry.stop){
+          timeEntry.start = moment(timeEntry.start);
+          timeEntry.stop = moment(timeEntry.stop);
+
+          const duration = moment.duration(timeEntry.stop.diff(timeEntry.start));
+          hours += duration.asHours();
+        }
+      }
+      data.push(hours);
+    }
+    return data;
+  }
+
+  async loadProductivity(){
+    const series = [ await this.getHoursWorked() ];
+    this.productivityChart = {
       data: {
         labels: ['12am', '3pm', '6pm', '9pm', '12pm', '3am', '6am', '9am'],
         series: [[230, 750, 450, 300, 280, 240, 200, 190]],
@@ -250,7 +323,19 @@ export default class Dashboard extends Vue {
         },
       },
     };
-    this.emailsSubscriptionChart = {
+  }
+
+  async getTags() {
+    return [12, 17, 7, 17, 23, 18, 38];
+  }
+
+  async getIdleTime() {
+    return [12, 17, 7, 17, 23, 18, 38];
+  }
+
+  async loadTags(){
+    const series = [ await this.getHoursWorked() ];
+    this.topUsedTagsChart = {
       data: {
         labels: [
           'Ja',
@@ -281,19 +366,6 @@ export default class Dashboard extends Vue {
           left: 0,
         },
       },
-      responsiveOptions: [
-        [
-          'screen and (max-width: 640px)',
-          {
-            seriesBarDistance: 5,
-            axisX: {
-              labelInterpolationFnc(value) {
-                return value[0];
-              },
-            },
-          },
-        ],
-      ],
     };
   }
 }

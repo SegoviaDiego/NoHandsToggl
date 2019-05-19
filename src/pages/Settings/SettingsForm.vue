@@ -7,12 +7,15 @@
       </md-card-header>
 
       <md-card-content>
-        <div class="md-layout">
+        <div class="md-layout md-gutter">
           <div class="md-layout-item md-small-size-100 md-size-33">
             <md-field>
               <label>Toggl API Token</label>
               <md-input v-model="settings.token" />
             </md-field>
+          </div>
+          <div class="md-layout-item md-small-size-100 md-size-33">
+            <md-switch v-model="settings.pingMode" :value="true">Ping mode</md-switch>
           </div>
           <div class="md-layout-item md-small-size-100 md-size-33">
             <md-switch v-model="settings.showHoursWorkedChart" :value="true">Show hours worked chart</md-switch>
@@ -42,7 +45,7 @@
           <div class="md-layout-item md-size-100 text-right" v-if="settings && settings.timeEntrySetup && workspaces && workspaces.length">
             <md-field>
               <label for="workspace">Workspace</label>
-              <md-select v-model="settings.timeEntrySetup.wid" name="workspace" id="workspace" @change="getWorkspaceData">
+              <md-select v-model="settings.timeEntrySetup.wid" name="workspace" id="workspace" @change="getWorkspaceData()">
                 <template v-for="ws in workspaces">
                   <md-option v-bind:key="`ws-${ws.id}`" :value="ws.id">{{ws.name}}</md-option>
                 </template>
@@ -119,6 +122,7 @@ export default class Login extends Vue {
           if(!this.settings || !this.settings.token) return;
           const ws = await axios.get('https://www.toggl.com/api/v8/workspaces');
           this.workspaces = ws.data;
+          this.getWorkspaceData();
       });
   }
 
