@@ -1,39 +1,12 @@
 import Vue from 'vue';
-import Router from 'vue-router';
-import ElectronStore from 'electron-store';
-import axios from 'axios'
+import VueRouter from 'vue-router';
+import routes from './routes/routes';
 
-Vue.use(Router);
+Vue.use(VueRouter);
 
-const store = new ElectronStore();
-
-const router = new Router({
-  routes: [
-    {
-      path: '/login',
-      name: 'login',
-      component: () => import(/* webpackChunkName: "login" */ './views/Login.vue'),
-    },
-    {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import(/* webpackChunkName: "dashboard" */ './views/Dashboard.vue'),
-    },
-    {
-      path: '*',
-      redirect: '/login'
-    }
-  ],
+const router = new VueRouter({
+  routes,
+  linkExactActiveClass: 'nav-item active',
 });
-
-router.beforeEach((to, from, next)=>{
-  if(to.fullPath !== '/login' && !store.get('TOGGL_APITOKEN')) next('/login');
-  else if(store.get('TOGGL_APITOKEN') && !axios.defaults.auth)
-    axios.defaults.auth = {
-      username: `${store.get('TOGGL_APITOKEN')}`,
-      password: 'api_token'
-    }
-  next();
-})
 
 export default router;
